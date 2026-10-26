@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentAI Secure Workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top right, rgba(255, 0, 0, 0.18), transparent 25%),
+                radial-gradient(circle at center, rgba(180, 0, 0, 0.10), transparent 30%),
+                #050505;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .secret-exit {
+            position: fixed;
+            top: 10px;
+            right: 14px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.18);
+            text-decoration: none;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 4px 8px;
+            border-radius: 999px;
+            z-index: 9999;
+            transition: 0.2s ease;
+        }
+
+        .secret-exit:hover {
+            color: rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .logo-dot {
+            width: 18px;
+            height: 18px;
+            background: #ff2b2b;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 43, 43, 0.7);
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 8px;
+            border-radius: 999px;
+        }
+
+        .nav a {
+            color: #f3f3f3;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.03);
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        .nav a.active {
+            background: linear-gradient(135deg, #ff3b30, #7a0b0b);
+            box-shadow: 0 0 18px rgba(255, 59, 48, 0.35);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-bottom: 24px;
+        }
+
+        .hero-left,
+        .hero-right,
+        .panel,
+        .stats-card,
+        .mini-card {
+            background: linear-gradient(180deg, rgba(30,0,0,0.65), rgba(10,10,10,0.92));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+        }
+
+        .hero-left {
+            padding: 34px;
+            min-height: 480px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fca5a5;
+            margin-bottom: 18px;
+        }
+
+        .hero-left h1 {
+            font-size: 72px;
+            line-height: 0.96;
+            margin-bottom: 18px;
+            letter-spacing: -2px;
+        }
+
+        .hero-left p {
+            color: #d1d5db;
+            max-width: 640px;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .hero-buttons button {
+            border: none;
+            padding: 14px 22px;
+            border-radius: 999px;
+            font-size: 15px;
+            color: white;
+            pointer-events: none;
+        }
+
+        .btn-dark {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #ff3b30, #7a0b0b);
+        }
+
+        .jelly {
+            position: absolute;
+            right: -30px;
+            top: 20px;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, rgba(255,60,60,0.95) 0%, rgba(120,0,0,0.75) 55%, transparent 75%);
+            filter: blur(10px);
+            box-shadow: 0 0 70px rgba(255,0,0,0.35);
+            opacity: 0.9;
+        }
+
+        .hero-right {
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .mini-card {
+            padding: 22px;
+        }
+
+        .mini-card h3 {
+            color: #fca5a5;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .mini-card .value {
+            font-size: 46px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .mini-card p {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 26px;
+        }
+
+        .stats-card {
+            padding: 24px;
+        }
+
+        .stats-card h4 {
+            color: #fca5a5;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stats-card .num {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stats-card span {
+            color: #d1d5db;
+            font-size: 14px;
+        }
+
+        .lower-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            padding: 28px;
+            min-height: 250px;
+        }
+
+        .panel h2 {
+            font-size: 34px;
+            margin-bottom: 14px;
+            color: white;
+        }
+
+        .panel p {
+            color: #d1d5db;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .panel strong {
+            color: #ff5a52;
+        }
+
+        .fake-inputs {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .fake-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #bbb;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 28px;
+            color: #a3a3a3;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 1100px) {
+            .hero,
+            .lower-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-left h1 {
+                font-size: 52px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/logout/" class="secret-exit">exit</a>
+
+    <div class="container">
+        <div class="topbar">
+            <div class="logo">
+                <div class="logo-dot"></div>
+                <div>AgentAI</div>
+            </div>
+
+            <div class="nav">
+                <a class="active" href="#">Home</a>
+                <a href="#">Services</a>
+                <a href="#">Works</a>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="hero-left">
+                <div class="badge">AI-Driven Agency</div>
+                <h1>Your AI<br> Sprint Team<br> On Demand</h1>
+                <p>
+                    From discovery to deployment, we plug into your stack to prototype,
+                    validate, and launch AI experiences your users actually love.
+                </p>
+
+                <div class="hero-buttons">
+                    <button class="btn-dark">Explore Services</button>
+                    <button class="btn-red">View Pricing Plans</button>
+                </div>
+
+                <div class="jelly"></div>
+            </div>
+
+            <div class="hero-right">
+                <div class="mini-card">
+                    <h3>Projects Successfully Launched</h3>
+                    <div class="value">230+</div>
+                    <p>Robust enterprise workflows, agent systems, and AI-powered internal operations.</p>
+                </div>
+
+                <div class="mini-card">
+                    <h3>Trusted Partners</h3>
+                    <div class="value">400+</div>
+                    <p>Cross-industry support across product engineering, automation, and deployment.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h4>Happy Clients</h4>
+                <div class="num">3M+</div>
+                <span>Strong global engagement</span>
+            </div>
+
+            <div class="stats-card">
+                <h4>ROI Improvement</h4>
+                <div class="num">95%</div>
+                <span>Operational efficiency uplift</span>
+            </div>
+
+            <div class="stats-card">
+                <h4>Client Retention</h4>
+                <div class="num">88%</div>
+                <span>Long-term product partnerships</span>
+            </div>
+        </div>
+
+        <div class="lower-grid">
+            <div class="panel">
+                <h2>We <strong>design</strong> and deploy AI solutions</h2>
+                <p>
+                    With people at the core, ensuring every system enhances real user experiences.
+                    Scalable delivery, production readiness, and resilient deployment pipelines.
+                </p>
+
+                <div class="fake-inputs">
+                    <div class="fake-input">AI Strategy Mapping</div>
+                    <div class="fake-input">Stakeholder Discovery</div>
+                    <div class="fake-input">Readiness Assessment</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Based in <strong>Montréal, Canada</strong></h2>
+                <p>
+                    Trusted by leading teams across multiple industries. From idea to production
+                    in 8–10 weeks with a full-stack execution model.
+                </p>
+
+                <div class="fake-inputs">
+                    <div class="fake-input">Available for worldwide projects</div>
+                    <div class="fake-input">Client Portal Access</div>
+                    <div class="fake-input">Partner Success Console</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            Secure workspace loaded successfully.
+        </div>
+    </div>
+</body>
+</html>

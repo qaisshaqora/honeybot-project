@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Login Attempts{% endblock %}
+{% block navbar %}Login Attempts{% endblock %}
+
+{% block content %}
+<style>
+    .attempt-success { color: #22c55e; font-weight: bold; }
+    .attempt-failed { color: #ef4444; font-weight: bold; }
+
+    .row-success td {
+        background: rgba(34, 197, 94, 0.10);
+    }
+
+    .row-failed td {
+        background: rgba(239, 68, 68, 0.10);
+    }
+</style>
+
+<div class="table-card">
+    <h2>All Login Attempts</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Source IP</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in attempts %}
+            <tr class="{% if item.access_type == 'Authorized Login' %}row-success{% else %}row-failed{% endif %}">
+                <td>{{ item.id }}</td>
+                <td>{{ item.username }}</td>
+                <td>{{ item.email|default:'No email' }}</td>
+                <td>
+                    {% if item.access_type == "Authorized Login" %}
+                        <span class="attempt-success">{{ item.access_type }}</span>
+                    {% else %}
+                        <span class="attempt-failed">{{ item.access_type }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.source_ip }}</td>
+                <td>{{ item.login_time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No login attempts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

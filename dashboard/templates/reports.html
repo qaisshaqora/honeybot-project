@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+{% block navbar %}Reports Page{% endblock %}
+
+{% block content %}
+<style>
+    .row-critical td {
+        background: rgba(239, 68, 68, 0.12);
+        color: #fecaca;
+    }
+
+    .row-high td {
+        background: rgba(249, 115, 22, 0.12);
+        color: #fdba74;
+    }
+
+    .row-medium td {
+        background: rgba(168, 85, 247, 0.12);
+        color: #d8b4fe;
+    }
+
+    .row-low td {
+        background: rgba(34, 197, 94, 0.12);
+        color: #bbf7d0;
+    }
+
+    .row-critical:hover td,
+    .row-high:hover td,
+    .row-medium:hover td,
+    .row-low:hover td {
+        filter: brightness(1.08);
+    }
+
+    .severity-critical { color: #ef4444; font-weight: bold; }
+    .severity-high { color: #f97316; font-weight: bold; }
+    .severity-medium { color: #a855f7; font-weight: bold; }
+    .severity-low { color: #22c55e; font-weight: bold; }
+</style>
+
+<div class="stats-grid">
+    <div class="card">
+        <div class="stat-icon icon-blue">#</div>
+        <h3>Total Attacks</h3>
+        <p>{{ total_attacks }}</p>
+        <div class="trend up">All recorded incidents</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-red">!</div>
+        <h3>Critical</h3>
+        <p>{{ critical_count }}</p>
+        <div class="trend danger">Highest risk events</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-orange">↑</div>
+        <h3>High</h3>
+        <p>{{ high_count }}</p>
+        <div class="trend warn">Serious incidents</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.12); color: #a855f7;">●</div>
+        <h3>Medium</h3>
+        <p>{{ medium_count }}</p>
+        <div class="trend" style="color:#a855f7;">Moderate incidents</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h2>Generated Reports</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Attack Type</th>
+                <th>Source IP</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attack in attacks %}
+            <tr class="
+                {% if attack.severity == 'Critical' %}row-critical
+                {% elif attack.severity == 'High' %}row-high
+                {% elif attack.severity == 'Medium' %}row-medium
+                {% else %}row-low{% endif %}
+            ">
+                <td>{{ attack.id }}</td>
+                <td>{{ attack.attack_type }}</td>
+                <td>{{ attack.source_ip }}</td>
+                <td>
+                    {% if attack.severity == "Critical" %}
+                        <span class="severity-critical">{{ attack.severity }}</span>
+                    {% elif attack.severity == "High" %}
+                        <span class="severity-high">{{ attack.severity }}</span>
+                    {% elif attack.severity == "Medium" %}
+                        <span class="severity-medium">{{ attack.severity }}</span>
+                    {% else %}
+                        <span class="severity-low">{{ attack.severity }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ attack.status }}</td>
+                <td>{{ attack.event_time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No reports found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

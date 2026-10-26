@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+{% block navbar %}Settings Page{% endblock %}
+
+{% block content %}
+<div class="section-card" style="max-width: 900px;">
+    <div class="section-head">
+        <div>
+            <h2>System Settings</h2>
+            <p>Manage system identity, notifications, and monitoring mode.</p>
+        </div>
+    </div>
+
+    {% if success_message %}
+    <div style="background: rgba(34,197,94,0.14); color:#86efac; padding:14px; border-radius:14px; margin-bottom:18px; border:1px solid rgba(34,197,94,0.18);">
+        {{ success_message }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="setting-item">
+            <label>System Name</label>
+            <input type="text" name="system_name" value="{{ setting.system_name|default:'Honeypot System' }}" required>
+        </div>
+
+        <div class="setting-item">
+            <label>Alert Level</label>
+            <select name="alert_level">
+                <option value="Low" {% if setting.alert_level == "Low" %}selected{% endif %}>Low</option>
+                <option value="Medium" {% if setting.alert_level == "Medium" %}selected{% endif %}>Medium</option>
+                <option value="High" {% if setting.alert_level == "High" %}selected{% endif %}>High</option>
+                <option value="Critical" {% if setting.alert_level == "Critical" %}selected{% endif %}>Critical</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label>Email Notifications</label>
+            <select name="email_notifications">
+                <option value="Enabled" {% if setting.email_notifications == "Enabled" %}selected{% endif %}>Enabled</option>
+                <option value="Disabled" {% if setting.email_notifications == "Disabled" %}selected{% endif %}>Disabled</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label>System Mode</label>
+            <select name="system_mode">
+                <option value="Monitoring" {% if setting.system_mode == "Monitoring" %}selected{% endif %}>Monitoring</option>
+                <option value="Testing" {% if setting.system_mode == "Testing" %}selected{% endif %}>Testing</option>
+                <option value="Maintenance" {% if setting.system_mode == "Maintenance" %}selected{% endif %}>Maintenance</option>
+            </select>
+        </div>
+
+        <button type="submit" class="save-btn">Save Settings</button>
+    </form>
+</div>
+{% endblock %}

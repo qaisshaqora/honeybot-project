@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payload Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.20), transparent 35%),
+                linear-gradient(135deg, #0f172a, #1d4ed8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .box {
+            width: 700px;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 22px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #0f172a;
+            font-size: 34px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 15px;
+            resize: vertical;
+            background: #f9fafb;
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1e3a8a, #4338ca);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-bottom: 18px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #e0f2fe;
+            color: #075985;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .examples {
+            margin-top: 22px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #f3f4f6;
+        }
+
+        .examples h4 {
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .examples code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #1d4ed8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Suspicious Payload Lab</h2>
+        <div class="subtitle">
+            Submit a local test payload. The system will detect suspicious patterns and log them as attack events.
+        </div>
+
+        {% if success_message %}
+        <div class="message">{{ success_message }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="payload" placeholder="Enter suspicious test payload here..." required>{{ submitted_payload }}</textarea>
+            <button type="submit" class="btn">Submit Payload</button>
+        </form>
+
+        <div class="examples">
+            <h4>Example test payloads</h4>
+            <code>' OR 1=1 --</code>
+            <code>&lt;script&gt;alert('xss')&lt;/script&gt;</code>
+            <code>../../../etc/passwd</code>
+        </div>
+
+        <a class="back-link" href="/">Back to Dashboard</a>
+    </div>
+</body>
+</html>

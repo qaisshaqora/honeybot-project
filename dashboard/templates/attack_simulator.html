@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Attack Simulator{% endblock %}
+
+{% block navbar %}Attack Simulator{% endblock %}
+
+{% block content %}
+<div class="box">
+    <h2>Simulate Attack Event</h2>
+
+    {% if success_message %}
+    <div style="background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 10px; margin-bottom: 18px;">
+        {{ success_message }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="setting-item">
+            <label>Attack Type</label>
+            <select name="attack_type" required>
+                <option value="SSH Brute Force">SSH Brute Force</option>
+                <option value="SQL Injection">SQL Injection</option>
+                <option value="XSS Attempt">XSS Attempt</option>
+                <option value="Admin Panel Probe">Admin Panel Probe</option>
+                <option value="Brute Force Login">Brute Force Login</option>
+                <option value="Malicious XSS Payload">Malicious XSS Payload</option>
+                <option value="Recon Scan">Recon Scan</option>
+                <option value="Suspicious Login Attempt">Suspicious Login Attempt</option>
+                <option value="Credential Stuffing">Credential Stuffing</option>
+                <option value="DDoS Simulation">DDoS Simulation</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label>Source IP</label>
+            <input type="text" name="source_ip" placeholder="Example: 192.168.1.25" required>
+        </div>
+
+        <div class="setting-item">
+            <label>Severity</label>
+            <select name="severity" required>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label>Status</label>
+            <select name="status" required>
+                <option value="Detected">Detected</option>
+                <option value="Investigating">Investigating</option>
+                <option value="Blocked">Blocked</option>
+                <option value="Mitigated">Mitigated</option>
+            </select>
+        </div>
+
+        <button type="submit" class="save-btn">Simulate Attack</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block navbar %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="card">
+        <div class="stat-icon icon-blue">🛡</div>
+        <h3>Total Attacks</h3>
+        <p>{{ total_attacks }}</p>
+        <div class="trend up">+ Live monitored events</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-red">!</div>
+        <h3>Critical Alerts</h3>
+        <p>{{ alerts_count }}</p>
+        <div class="trend danger">+ High priority incidents</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-orange">SSH</div>
+        <h3>SSH Attacks</h3>
+        <p>{{ ssh_count }}</p>
+        <div class="trend warn">+ Brute-force related events</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-green">SQL</div>
+        <h3>SQL Injection</h3>
+        <p>{{ sql_count }}</p>
+        <div class="trend up">+ Database-layer attack attempts</div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="card">
+        <div class="stat-icon icon-green">✔</div>
+        <h3>Successful Logins</h3>
+        <p style="color:#22c55e;">{{ successful_logins }}</p>
+        <div class="trend up">Authorized Login</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-red">✖</div>
+        <h3>Failed Logins</h3>
+        <p style="color:#ef4444;">{{ failed_logins|default:0 }}</p>
+        <div class="trend danger">Failed Login Attempts</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-purple">👤</div>
+        <h3>Recent Access</h3>
+        <p style="color:#a855f7;">{{ recent_login_attempts|length }}</p>
+        <div class="trend medium">Last recorded attempts</div>
+    </div>
+
+    <div class="card">
+        <div class="stat-icon icon-blue">📋</div>
+        <h3>Access Monitor</h3>
+        <p style="color:#60a5fa;">{{ recent_attacks|length }}</p>
+        <div class="trend up">Latest security feed</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="section-card">
+        <div class="section-head">
+            <div>
+                <h2>Attack Trend Overview</h2>
+                <p>Attack count distribution by type</p>
+            </div>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="attackTrendChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-head">
+            <div>
+                <h2>Severity Activity</h2>
+                <p>Current severity level breakdown</p>
+            </div>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="severityBarChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<style>
+    .recent-critical { color: #ef4444; font-weight: bold; }
+    .recent-high { color: #f97316; font-weight: bold; }
+    .recent-medium { color: #a855f7; font-weight: bold; }
+    .recent-low { color: #22c55e; font-weight: bold; }
+
+    .attempt-success { color: #22c55e; font-weight: bold; }
+    .attempt-failed { color: #ef4444; font-weight: bold; }
+</style>
+
+<div class="table-card" style="margin-bottom: 18px;">
+    <h2>Recent Attacks</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Attack Type</th>
+                <th>Source IP</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attack in recent_attacks %}
+            <tr>
+                <td>{{ attack.id }}</td>
+                <td>{{ attack.attack_type }}</td>
+                <td>{{ attack.source_ip }}</td>
+                <td>
+                    {% if attack.severity == "Critical" %}
+                        <span class="recent-critical">{{ attack.severity }}</span>
+                    {% elif attack.severity == "High" %}
+                        <span class="recent-high">{{ attack.severity }}</span>
+                    {% elif attack.severity == "Medium" %}
+                        <span class="recent-medium">{{ attack.severity }}</span>
+                    {% else %}
+                        <span class="recent-low">{{ attack.severity }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ attack.status }}</td>
+                <td>{{ attack.event_time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No attack events found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-card">
+    <h2>Recent Login Attempts</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Source IP</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in recent_login_attempts %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.username }}</td>
+                <td>{{ item.email|default:'No email' }}</td>
+                <td>
+                    {% if item.access_type == "Authorized Login" %}
+                        <span class="attempt-success">{{ item.access_type }}</span>
+                    {% else %}
+                        <span class="attempt-failed">{{ item.access_type }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.source_ip }}</td>
+                <td>{{ item.login_time }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No login attempts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{{ attack_type_labels|json_script:"attack-type-labels" }}
+{{ attack_type_counts|json_script:"attack-type-counts" }}
+{{ severity_labels|json_script:"severity-labels" }}
+{{ severity_counts|json_script:"severity-counts" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const attackTypeLabels = JSON.parse(document.getElementById('attack-type-labels').textContent);
+    const attackTypeCounts = JSON.parse(document.getElementById('attack-type-counts').textContent);
+    const severityLabels = JSON.parse(document.getElementById('severity-labels').textContent);
+    const severityCounts = JSON.parse(document.getElementById('severity-counts').textContent);
+
+    function getThemeColors() {
+        const styles = getComputedStyle(document.documentElement);
+        return {
+            text: styles.getPropertyValue('--text').trim(),
+            muted: styles.getPropertyValue('--muted').trim(),
+            border: styles.getPropertyValue('--border').trim(),
+            accent: styles.getPropertyValue('--accent').trim(),
+            danger: '#ef4444',
+            high: '#f97316',
+            medium: '#a855f7',
+            low: '#22c55e'
+        };
+    }
+
+    let attackTrendChart;
+    let severityBarChart;
+
+    function renderCharts() {
+        const c = getThemeColors();
+
+        if (attackTrendChart) attackTrendChart.destroy();
+        if (severityBarChart) severityBarChart.destroy();
+
+        attackTrendChart = new Chart(document.getElementById('attackTrendChart'), {
+            type: 'line',
+            data: {
+                labels: attackTypeLabels,
+                datasets: [{
+                    label: 'Attack Count',
+                    data: attackTypeCounts,
+                    borderColor: c.accent,
+                    backgroundColor: 'rgba(124, 140, 255, 0.18)',
+                    fill: true,
+                    tension: 0.42,
+                    borderWidth: 3,
+                    pointBackgroundColor: c.accent,
+                    pointBorderColor: c.accent,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: c.text }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: c.muted },
+                        grid: { color: c.border }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: c.muted, precision: 0 },
+                        grid: { color: c.border }
+                    }
+                }
+            }
+        });
+
+        const severityColorMap = {
+            'Critical': c.danger,
+            'High': c.high,
+            'Medium': c.medium,
+            'Low': c.low
+        };
+
+        const severityColors = severityLabels.map(label => severityColorMap[label] || c.accent);
+
+        severityBarChart = new Chart(document.getElementById('severityBarChart'), {
+            type: 'bar',
+            data: {
+                labels: severityLabels,
+                datasets: [{
+                    label: 'Severity Count',
+                    data: severityCounts,
+                    backgroundColor: severityColors,
+                    borderRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: c.text }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: c.muted },
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: c.muted, precision: 0 },
+                        grid: { color: c.border }
+                    }
+                }
+            }
+        });
+    }
+
+    renderCharts();
+
+    const observer = new MutationObserver(() => {
+        renderCharts();
+    });
+
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
+</script>
+{% endblock %}
